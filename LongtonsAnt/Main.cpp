@@ -17,7 +17,7 @@ int main()
 
 	if (userInput == 1)
 	{
-		cout << "You chose: " << userInput << endl;
+		cout << "You chose number: " << userInput << endl;
 
 
 	}
