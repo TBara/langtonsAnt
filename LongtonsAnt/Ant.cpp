@@ -6,6 +6,14 @@ Ant::Ant()
 	yPosition = 0;
 }
 
+//Parameterized Constructor 
+Ant::Ant(int rowPos, int colPos)
+{
+	xPosition = colPos;
+	yPosition = rowPos;
+	antDirection = SOUTH;
+}
+
 //Destructor
 Ant::~Ant()
 {
@@ -13,24 +21,32 @@ Ant::~Ant()
 }
 
 
-void getPosition()
+int Ant::getXPosition()
+{
+	return xPosition;
+}
+
+int Ant::getYPosition()
+{
+	return yPosition;
+}
+
+int Ant::getOrientation()
+{
+	return antDirection;
+}
+
+void Ant::setNewXPosition()
 {
 
 }
 
-
-void getOrientation()
+void Ant::setNewYPosition()
 {
 
 }
 
-
-void setNewPosition()
-{
-
-}
-
-void setNewOrientation()
+void Ant::setNewOrientation()
 {
 
 }

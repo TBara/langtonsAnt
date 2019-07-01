@@ -3,24 +3,27 @@
 
 class Ant
 {
-private:
-	int xPosition;
-	int yPosition;
-	int antDirection;
-
+public:
 	enum Direction
 	{
 		NORTH, WEST, SOUTH, EAST
 	};
 
-public:
 	Ant();
+	Ant(int row, int col);
 	~Ant();
-	void getPosition();
-	void getOrientation();
-	void setNewPosition();
+	int getXPosition();
+	int getYPosition();
+	void setNewXPosition();
+	void setNewYPosition();
 	void setNewOrientation();
-	Direction dir;
+	int getOrientation();
+	//Direction direction;
+
+private:
+	int xPosition;
+	int yPosition;
+	Direction antDirection;
 };
 
 #endif
