@@ -1,17 +1,11 @@
 #include "Ant.hpp"
-//Default constructor
-Ant::Ant()
-{
-	xPosition = 0;
-	yPosition = 0;
-}
 
 //Parameterized Constructor 
 Ant::Ant(int rowPos, int colPos)
 {
 	xPosition = colPos;
 	yPosition = rowPos;
-	antDirection = SOUTH;
+	antDir = 'W';
 }
 
 //Destructor
@@ -19,7 +13,6 @@ Ant::~Ant()
 {
 
 }
-
 
 int Ant::getXPosition()
 {
@@ -31,22 +24,22 @@ int Ant::getYPosition()
 	return yPosition;
 }
 
-int Ant::getOrientation()
+char Ant::getOrientation()
 {
-	return antDirection;
+	return antDir;
 }
 
-void Ant::setNewXPosition()
+void Ant::setNewXPosition(int newX)
 {
-
+	xPosition = newX;
 }
 
-void Ant::setNewYPosition()
+void Ant::setNewYPosition(int newY)
 {
-
+	yPosition = newY;
 }
 
-void Ant::setNewOrientation()
+void Ant::setNewOrientation(char newOrientation)
 {
-
+	antDir = newOrientation;
 }
