@@ -1,53 +1,73 @@
-﻿#include <iostream>
+﻿/*********************************************************************
+** Program name: Langton's Ant
+** Author: Tom Barabasz
+** Date: 07/04/2019
+** Description: This program simulates Langton's Ant. The ant is placed 
+	onto the board that is filled with white spaces, and starts moving forward.
+	If the ant is on a white space, turn right 90 degrees and change the space to black.
+	If the ant is on a black space, turn left 90 degrees and change the space to white.
+*********************************************************************/
+
+#include <iostream>
 #include <string>
+#include <cmath>
 #include "Ant.hpp"
 
 using std::cin;
 using std::cout;
 using std::endl;
+using std::floor;
+using std::ceil;
 using std::string;
+using std::rand;
 
 bool inputValidInt(std::string, int&);
+void menu(int*, string);
 void printBoard(char** array, int rows, int cols, Ant ant);
-int moveNS(Ant ant, int, int);
-int moveEW(Ant ant, int, int);
 void changeSpCol(char** array, int, int);
+bool randStart(string, int &initX, int &initY, int rows, int columns);
+
+const char BLANK_SPACE = ' ';
 
 int main()
 {
+	//Memory leak check
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
 	int initialX = 0;
 	int initialY = 0;
 	int rows = 0;
 	int columns = 0;
 	int steps = 0;
 	int userInput = 0;
-	char spColor = '_';
+	char spColor = BLANK_SPACE;
 
-	do
-	{
-		inputValidInt("Press 1 to start Langton Ant simulation or press 2 to exit the program", userInput);
-	} while (userInput != 1 && userInput != 2);
+	//Start menu
+	menu(&userInput, "Press 1 to start Langton Ant simulation or press 2 to exit the program");
 
-
+	//If the user wants to play
 	if (userInput == 1)
-	{
+	{	
 		inputValidInt("Enter number of rows on the board", rows);
 		inputValidInt("Enter number of columns on the board", columns);
 		inputValidInt("Enter number of steps the ant will take", steps);
 
-		//Get ant's initial position
-		do
+		if (!randStart("**Extra credit: Would you like the ant to start at a random location?\n Press 1 for Yes \n Press 2 for No \n", initialX, initialY, rows, columns))
 		{
-			inputValidInt("Enter ant's initial row number. ", initialY);
-			inputValidInt("Enter ant's initial column number", initialX);
-			if ((initialY > columns) || (initialX > rows))
+			//Get ant's initial position
+			do
 			{
-				cout << "The ant can't be placed there." << endl;
-			}
-		} while ((initialY > columns) || (initialX > rows) || (initialY < 0) || (initialX < 0));
+				inputValidInt("Enter ant's initial row number. ", initialY);
+				inputValidInt("Enter ant's initial column number", initialX);
+				if ((initialY > columns - 1) || (initialX > rows - 1))
+				{
+					cout << "The ant can't be placed there." << endl;
+				}
+			} while ((initialY > columns - 1) || (initialX > rows - 1) || (initialY < 0) || (initialX < 0));
+		}
 
 		//Instantiate ant
-		Ant ant(initialY, initialX);
+		Ant ant(initialY, initialX, 'W');
 		
 		//Create array of arrays and set all fields to blank space
 		char** arr = new char* [rows];
@@ -60,7 +80,7 @@ int main()
 			}
 		}
 		
-		//print board
+		//print initial layout of the board
 		printBoard(arr, rows, columns, ant);
 
 		//move the ant
@@ -72,32 +92,33 @@ int main()
 			char spaceColor = arr[yPos][xPos];
 
 			cout << "Ant's current1 position is " << ant.getXPosition() << " " << ant.getYPosition() << endl;
-			//antMove(ant, rows, columns, arr);
-			//printBoard(arr, rows, columns, ant);
 			cout << "Space color is: " << spaceColor << endl;
-			if (spaceColor == '_')
+			cout << "Orientation is: " << orientation << endl;
+			
+			//Simulation rules
+			if (spaceColor == BLANK_SPACE)
 			{
 				switch (orientation)
 				{
 				case 'N':
 					ant.setNewOrientation('E');
 					changeSpCol(arr, xPos, yPos);
-					ant.setNewXPosition(moveEW(ant, 1, columns));
+					ant.setNewXPosition(ant.moveEW(ant, 1, columns));
 					break;
 				case 'E':
 					ant.setNewOrientation('S');
 					changeSpCol(arr, xPos, yPos);
-					ant.setNewYPosition(moveNS(ant, 1, rows));
+					ant.setNewYPosition(ant.moveNS(ant, 1, rows));
 					break;
 				case 'S':
 					ant.setNewOrientation('W');
 					changeSpCol(arr, xPos, yPos);
-					ant.setNewXPosition(moveEW(ant, -1, columns));
+					ant.setNewXPosition(ant.moveEW(ant, -1, columns));
 					break;
 				case 'W':
 					ant.setNewOrientation('N');
 					changeSpCol(arr, xPos, yPos);
-					ant.setNewYPosition(moveNS(ant, -1, rows));
+					ant.setNewYPosition(ant.moveNS(ant, -1, rows));
 					break;
 				default:
 					break;
@@ -110,80 +131,114 @@ int main()
 				case 'N':
 					ant.setNewOrientation('W');
 					changeSpCol(arr, ant.getXPosition(), ant.getYPosition());
-					ant.setNewXPosition(moveEW(ant, -1, columns));
+					ant.setNewXPosition(ant.moveEW(ant, -1, columns));
 					break;
 				case 'E':
 					ant.setNewOrientation('N');
 					changeSpCol(arr, xPos, yPos);
-					ant.setNewYPosition(moveNS(ant, -1, rows));
+					ant.setNewYPosition(ant.moveNS(ant, -1, rows));
 					break;
 				case 'S':
 					ant.setNewOrientation('E');
 					changeSpCol(arr, xPos, yPos);
-					ant.setNewXPosition(moveEW(ant, 1, columns));
+					ant.setNewXPosition( ant.moveEW(ant, 1, columns));
 					break;
 				case 'W':
 					ant.setNewOrientation('S');
 					changeSpCol(arr, xPos, yPos);
-					ant.setNewYPosition(moveNS(ant, 1, rows));
+					ant.setNewYPosition(ant.moveNS(ant, 1, rows));
 					break;
 				default:
 					break;
 				}
 			}
-			cout << "Ant's current2 position is " << ant.getXPosition() << " " << ant.getYPosition() << endl;
 			printBoard(arr, rows, columns, ant);
 		}
-		
+		//Clean up dynamically allocated memory
+		for (int i = 0; i < rows; i++)
+		{
+			delete[] arr[i];
+		}
+		delete[] arr;
 	}
 
-	cin.ignore();
-	cin.get();
+	menu(&userInput, "Press 1 to play again. Press 2 to end the simulation");
+	if (userInput == 1)
+	{
+		main();
+	}
+
 	return 0;
 }
+/**********************************************************************
+						randStart
+This function askjs the user if they want to assign a random number 
+for ant's position. If the user opts to do so, the randoms are generated 
+and assigned to ant's initialX and initalY positions.
+**********************************************************************/
 
-int moveEW(Ant ant, int increment, int columns)
+bool randStart(string question, int& initX, int& initY, int rows, int columns)
 {
-	int currentXPos = ant.getXPosition();
-	int newXPos = currentXPos  + increment;
-	if (newXPos > columns -1)
+	bool result = false;
+	int	answer = 0;
+	//Get ant's initial position
+	do
 	{
-		newXPos = 0;
-	}
-	else if (newXPos < 0)
+		//Ask the user to enter 1 or 2
+		inputValidInt(question, answer);
+
+	} while (answer !=1 && answer !=2);
+	
+	//Generate random x,y position that fit on the board
+	if (answer == 1)
 	{
-		newXPos = columns - 1;
+		initX = rand() % (columns);
+		initY = rand() % (rows);
+		result = true;
 	}
-	return newXPos;
+
+	return result;
 }
 
-int moveNS(Ant ant, int increment, int rows)
+/*******************************************************
+					menu
+This function takes a pointer to an integer and a string to give 
+the user two choices. It validates the input for an integer. 
+Once 1 or 2 is entered the funtion sets pointer's value and exits. 
+*******************************************************/
+void menu(int *userInput, string question)
 {
-	int newYPos = ant.getYPosition() + increment;
-	if (newYPos > rows -1)
+	do
 	{
-		newYPos = 0;
-	}
-	else if (newYPos < 0)
-	{
-		newYPos = rows - 1;
-	}
-	return newYPos;
+		inputValidInt(question, *userInput);
+	} while (*userInput != 1 && *userInput != 2);
 }
 
+
+/*********************************************************************
+					changeSpCol
+This function takes the pointer to pointer of arrays of chars and two integers
+to determine the color and to reverse it
+*********************************************************************/
 void changeSpCol(char** arr, int row, int col)
 {
 	char spaceColor = arr[row][col];
-	if (spaceColor == '_')
+	if (spaceColor == BLANK_SPACE)
 	{
 		arr[row][col] = '#';
 	} 
 	else if (spaceColor == '#')
 	{
-		arr[row][col] = '_';
+		arr[row][col] = BLANK_SPACE;
 	}
 }
 
+/*********************************************************************
+					inputValidInt
+This function takes a string and a reference to an integer. It validates 
+user input for an integer. Once an integer is entered, the function returns
+true.
+*********************************************************************/
 bool inputValidInt(std::string question, int &userInp)
 {
 	bool validInt = false;
@@ -211,6 +266,10 @@ bool inputValidInt(std::string question, int &userInp)
 	return validInt;
 }
 
+/*********************************************************************
+					printBoard
+		This function prints the board
+*********************************************************************/
 void printBoard(char** array, int rows, int cols, Ant ant)
 {
 	//Referenced codereview.stackexchange.com/questions/51716/shortest-possible-way-of-printing-a-specific-board
@@ -218,23 +277,23 @@ void printBoard(char** array, int rows, int cols, Ant ant)
 	border.assign(cols + 2, '_');
 	cout << border << endl;
 
-	for (int i = 0; i < rows; i++) {
+	for (int i = 0; i < cols; i++) {
 
-		cout << "|" << array[i][0];
+		cout << "|";
 
-		for (int j = 1; j < cols-1; j++) {
+		for (int j = 0; j < rows; j++) {
 
-			if (i == ant.getXPosition() && j == ant.getYPosition())
+			if (j == ant.getXPosition() && i == ant.getYPosition())
 			{
 				cout << '*';
 			}
 			else
 			{
-				cout << array[i][j];
+				cout << array[j][i];
 			}
 		}
 
 		cout << "|" << endl;
 	}
-	cout << border << endl;
+	cout << border.assign(cols + 2, '_') << endl;
 }
