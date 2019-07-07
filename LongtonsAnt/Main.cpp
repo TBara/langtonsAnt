@@ -23,7 +23,7 @@ using std::rand;
 
 bool inputValidInt(std::string, int&);
 void menu(int*, string);
-void printBoard(char** array, int rows, int cols, Ant ant);
+void printBoard(char** array, int rows, int cols, Ant ant, int *step);
 void changeSpCol(char** array, int, int);
 bool randStart(string, int &initX, int &initY, int rows, int columns);
 
@@ -34,6 +34,7 @@ int main()
 	//Memory leak check
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
+	static int plays = 0;
 	int initialX = 0;
 	int initialY = 0;
 	int rows = 0;
@@ -43,15 +44,32 @@ int main()
 	char spColor = BLANK_SPACE;
 
 	//Start menu
-	menu(&userInput, "Press 1 to start Langton Ant simulation or press 2 to exit the program");
+	if (plays == 0)
+	{
+		//First play
+		menu(&userInput, "Press 1 to start Langton Ant simulation or press 2 to exit the program");
+	}
+	else
+	{
+		//User played before. Skip the menu.
+		userInput = 1;
+	}
+	
 
 	//If the user wants to play
 	if (userInput == 1)
 	{	
-		inputValidInt("Enter number of rows on the board", rows);
-		inputValidInt("Enter number of columns on the board", columns);
+
+		do //Do not allow 0 columns or 0 rows
+		{
+			inputValidInt("Enter number of rows on the board", rows);
+			inputValidInt("Enter number of columns on the board", columns);
+
+		} while ((rows < 1) || (columns < 1));
+
 		inputValidInt("Enter number of steps the ant will take", steps);
 
+		//Extra credit: If random start is chosen
 		if (!randStart("**Extra credit: Would you like the ant to start at a random location?\n Press 1 for Yes \n Press 2 for No \n", initialX, initialY, rows, columns))
 		{
 			//Get ant's initial position
@@ -79,17 +97,20 @@ int main()
 				arr[i][j] = spColor;
 			}
 		}
+
+		//Start counting steps
+		int step = 0;
 		
 		//print initial layout of the board
-		printBoard(arr, rows, columns, ant);
+		printBoard(arr, rows, columns, ant, &step);
 
 		//move the ant
-		for (int i = 0; i <= steps; i++)
+		for (int i = 1; i <= steps; i++)
 		{
 			int xPos = ant.getXPosition();
 			int yPos = ant.getYPosition();
 			char orientation = ant.getOrientation();
-			char spaceColor = arr[yPos][xPos];
+			char spaceColor = arr[xPos][yPos];
 
 			cout << "Ant's current1 position is " << ant.getXPosition() << " " << ant.getYPosition() << endl;
 			cout << "Space color is: " << spaceColor << endl;
@@ -152,7 +173,7 @@ int main()
 					break;
 				}
 			}
-			printBoard(arr, rows, columns, ant);
+			printBoard(arr, rows, columns, ant, &step);
 		}
 		//Clean up dynamically allocated memory
 		for (int i = 0; i < rows; i++)
@@ -161,7 +182,7 @@ int main()
 		}
 		delete[] arr;
 	}
-
+	plays++;
 	menu(&userInput, "Press 1 to play again. Press 2 to end the simulation");
 	if (userInput == 1)
 	{
@@ -172,11 +193,10 @@ int main()
 }
 /**********************************************************************
 						randStart
-This function askjs the user if they want to assign a random number 
+This function asks the user if they want to assign a random numbers 
 for ant's position. If the user opts to do so, the randoms are generated 
 and assigned to ant's initialX and initalY positions.
 **********************************************************************/
-
 bool randStart(string question, int& initX, int& initY, int rows, int columns)
 {
 	bool result = false;
@@ -236,8 +256,8 @@ void changeSpCol(char** arr, int row, int col)
 /*********************************************************************
 					inputValidInt
 This function takes a string and a reference to an integer. It validates 
-user input for an integer. Once an integer is entered, the function returns
-true.
+user input for an integer. Once an integer is entered, 
+the function returns true.
 *********************************************************************/
 bool inputValidInt(std::string question, int &userInp)
 {
@@ -256,7 +276,7 @@ bool inputValidInt(std::string question, int &userInp)
 		}
 		else
 		{
-			if (floor(integer) == ceil(integer) && integer >= 0)
+			if ((floor(integer) == ceil(integer)) && (integer >= 0))
 			{
 				validInt = true;
 				userInp = integer;
@@ -268,10 +288,14 @@ bool inputValidInt(std::string question, int &userInp)
 
 /*********************************************************************
 					printBoard
-		This function prints the board
+	This function prints the board. It takes in the pointer to 2D array pointer,
+	number of rows and columns, the ant object, and step increment integers as arguments. 
+	It uses these to print the board and the corresponding number of steps. 
 *********************************************************************/
-void printBoard(char** array, int rows, int cols, Ant ant)
+void printBoard(char** array, int rows, int cols, Ant ant, int *step)
 {
+	cout << "\n\nStep: " << *step << endl;
+	*step = *step + 1;
 	//Referenced codereview.stackexchange.com/questions/51716/shortest-possible-way-of-printing-a-specific-board
 	string border = "";
 	border.assign(cols + 2, '_');
@@ -296,4 +320,5 @@ void printBoard(char** array, int rows, int cols, Ant ant)
 		cout << "|" << endl;
 	}
 	cout << border.assign(cols + 2, '_') << endl;
+	
 }

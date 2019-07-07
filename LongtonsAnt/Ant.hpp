@@ -28,7 +28,7 @@ public:
 	
 	//Moves the ant East / West
 	int moveEW(Ant ant, int increment, int columns);
-	//Moves the ant North / South
+	//Moves the ant North / South 
 	int moveNS(Ant ant, int increment, int rows);
 
 private:

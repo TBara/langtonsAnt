@@ -63,14 +63,14 @@ placed on opposite end.
 int Ant::moveEW(Ant ant, int increment, int columns)
 {
 	int currentXPos = ant.getXPosition();
-	int newXPos = currentXPos + increment;
+	int newXPos = currentXPos + increment;  //move the ant by one space
 	if (newXPos > columns - 1)
 	{
-		newXPos = 0;
+		newXPos = 0; //Wrap the board
 	}
 	else if (newXPos < 0)
 	{
-		newXPos = columns - 1;
+		newXPos = columns - 1; //Wrap the board
 	}
 	return newXPos;
 }
